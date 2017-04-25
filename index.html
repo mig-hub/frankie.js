@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset="utf-8">
+  <title>Title</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Description">
+
+  <!--[if lt IE 9]>
+    <script src="http://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js"></script>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  </head>
+
+  <body>
+
+  <header>
+    <nav>
+    <ol>
+      <li><a href='/'>Index</a></li>
+      <li><a href='/home/alone'>Home</a></li>
+      <li><a href='/words/first/second'>First Second</a></li>
+      <li><a href='/css/main.css'>Main CSS</a></li>
+      <li><a href='/names/john/chris/frankie'>Names</a></li>
+      <li><a href='/not/a/real/route'>Not Found</a></li>
+      <li><a href='http://www.google.com'>Google</a></li>
+    </ol>
+    </nav>
+  </header>
+
+  <div id='content'></div>
+
+  <footer></footer>
+
+  <script type="text/javascript" src="/frankie.js"></script>
+  <script type="text/javascript">
+    var app = new Frankie.App({mode: 'history'});
+    app
+    .get('/', function() {
+      this.content('Index');
+    })
+    .get('/home/alone', function() {
+      this.content('Home');
+    })
+    .get('/words/:one/:two', function() {
+      this.content(this.params.one+'+'+this.params.two);
+    })
+    .get('/css/:file.:ext', function() {
+      this.content('CSS: '+this.params.file+'.'+this.params.ext);
+    })
+    /*.get('/builder', function() {
+      this.content(
+        this.tag('div', {class: 'bum'}, function() {
+          
+        });
+      );
+    })*/
+    .get('/names/*', function() {
+      this.content( 'Names: '+this.params.splat );
+    })
+    .get(/^regexp\/(.*)$/, function(word) {
+      this.content( 'Word: '+word );
+    })
+    .get('*', function() {
+      this.content( 'Not Found: '+this.params.splat );
+    })
+    .run();
+
+    /*
+    Frankie.takesTheStage();
+    get('/names/*', function(splat) {
+      document.getElementById('content').innerHTML = 'Names: '+splat;
+    });
+    run();
+    */
+    
+  </script>
+
+  </body>
+</html>
+

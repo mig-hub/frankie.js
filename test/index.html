@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Description">
+  </head>
+
+  <body>
+
+    <script type="text/javascript" src="../frankie.js"></script>
+    <script type="text/javascript" src="t.js"></script>
+    <script type="text/javascript">
+      
+      var newApp = function() {
+        return new Frankie.App({mode: 'history'});
+      }
+
+      T.tests.versionIsFormated = function() {
+        this.assertMatch(Frankie.version, /\d+\.\d+\.\d+/);        
+      }
+
+      T.tests.routerReturnsUndefinedOnUndefinedRoutes = function() {
+        var got = newApp().get('/', function() {
+          return 'index';
+        }).handle('/undefined/route');
+        this.assertEqual(got, undefined);
+      }
+
+      T.tests.routerHandlesRoot = function() {
+        var got = newApp().get('/', function() {
+          return 'index';
+        }).handle('/');
+        this.assertEqual(got, 'index');
+      }
+
+      T.tests.routerHandlesNestedRoute = function() {
+        var got = newApp()
+        .get('/', function() {
+          return 'index';
+        })
+        .get('/nested/route', function() {
+          return 'nested';
+        })
+        .handle('/nested/route');
+        this.assertEqual(got, 'nested');
+      }
+
+      T.tests.routerIgnoresTrailingSlashes = function() {
+        var app1 = newApp()
+        .get('/', function() {
+          return 'index';
+        })
+        .get('/nested/route/', function() {
+          return 'nested';
+        });
+        this.assertEqual(app1.handle(''), 'index');
+        this.assertEqual(app1.handle('nested/route'), 'nested');
+        var app2 = newApp()
+        .get('', function() {
+          return 'index';
+        })
+        .get('nested/route', function() {
+          return 'nested';
+        });
+        this.assertEqual(app2.handle('/'), 'index');
+        this.assertEqual(app2.handle('/nested/route/'), 'nested');
+      }
+
+      T.tests.routerAcceptsParamsInRoutes = function() {
+        var app = newApp()
+        .get('/product/:category/:id', function() {
+          return this.params.category+','+this.params.id;
+        })
+        .get('/css/:file.:ext', function() {
+          return this.params.file+','+this.params.ext;
+        });
+        this.assertEqual(app.handle('/product/jumper/AB-01-765'), 'jumper,AB-01-765');        
+        this.assertEqual(app.handle('/css/main.css'), 'main,css');        
+      }
+
+      T.tests.routerAcceptsSplat = function() {
+        var app = newApp()
+        .get('/names/*', function() {
+          return 'Names: '+this.params.splat.split('/').join(', ');
+        })
+        .get('*', function() {
+          return 'Not Found: '+this.params.splat;
+        });
+        this.assertEqual(app.handle('/names/Eric/Charles'), 'Names: Eric, Charles');        
+        this.assertEqual(app.handle('/news/we-are-opening'), 'Not Found: news/we-are-opening');        
+      }
+
+      T.tests.routerAcceptsRegexp = function() {
+        var got = newApp().get(/^product\/(.*)\/(.*)$/, function(category, id) {
+          return category+','+id;
+        }).handle('/product/jumper/AB-01-765');
+        this.assertEqual(got, 'jumper,AB-01-765');        
+      }
+
+      T.tests.routerAlwaysPassParamsAsArguments = function() {
+        var got = newApp().get('/product/:category/:id', function(category, id) {
+          return category+','+id;
+        }).handle('/product/jumper/AB-01-765');
+        this.assertEqual(got, 'jumper,AB-01-765');        
+      }
+
+      T.run();
+
+    </script>
+
+  </body>
+</html>
+
